@@ -44,7 +44,7 @@ var DEFAULT_UI = {
     ui_no_commands_for_pet: 'No commands for this pet',
     ui_type_dog: 'Dog', ui_type_bird: 'Bird', ui_type_xp: 'Type %s • XP %s',
     ui_hunting_dog: 'Hunting Dog', ui_hunting_bird: 'Hunting Bird',
-    ui_dead: 'Dead', ui_active: 'Active', ui_selected: 'Selected',
+    ui_dead: 'Dead', ui_active: 'Active', ui_select_pet: 'Select as Default', ui_selected: 'Selected',
     ui_condition_title: 'Condition', ui_health: 'Health', ui_hunger: 'Hunger', ui_thirst: 'Thirst',
     ui_actions_title: 'Actions', ui_call_flee: 'Call / Flee', ui_call_pet: 'Call Pet',
     ui_feeding: 'Feeding', ui_drinking: 'Drinking', ui_carrying: 'Carrying',
@@ -338,6 +338,10 @@ function openMyPets() {
     hide(qs('#petDetail'));
     show(qs('#ownedPetList'));
 
+    renderOwnedPetList();
+}
+
+function renderOwnedPetList() {
     var list = qs('#ownedPetList');
     list.innerHTML = '';
 
@@ -382,6 +386,9 @@ function openPetDetail(element, index) {
     show(qs('#petDetail'));
 
     var isActive = currentPet[element.name] === true;
+    var isDog = element.type === 'dog';
+    var isSelected = (isDog && state.selectedDog && state.selectedDog == element.id) ||
+        (!isDog && state.selectedBird && state.selectedBird == element.id);
     var detail = qs('#petDetail');
     var img = 'images/' + element.img;
 
@@ -393,6 +400,7 @@ function openPetDetail(element, index) {
         '       <div class="hero-desc">' + (element.type === 'dog' ? t('ui_hunting_dog') : t('ui_hunting_bird')) + ' \u2022 XP ' + (element.xp || 0) + '</div>' +
         '   </div>' +
         (isActive ? '<span class="pill">' + t('ui_active') + '</span>' : '') +
+        (isSelected ? '<span class="pill muted">' + t('ui_selected') + '</span>' : '') +
         '</div>';
 
     if (isActive) {
@@ -423,8 +431,10 @@ function openPetDetail(element, index) {
               '<button class="wood-btn muted" id="actDrink" type="button">' + t('ui_drinking') + '</button>' +
               '<button class="wood-btn muted" id="actCarry" type="button">' + t('ui_carrying') + '</button>' +
               extraBtn +
-              '<button class="wood-btn muted" id="actFollow" type="button">' + t('ui_follow_unfollow') + '</button>'
+              '<button class="wood-btn muted" id="actFollow" type="button">' + t('ui_follow_unfollow') + '</button>' +
+              '<button class="wood-btn' + (isSelected ? ' muted' : '') + '" id="actSelect" type="button">' + (isSelected ? t('ui_selected') : t('ui_select_pet')) + '</button>'
             : '<button class="wood-btn" id="actCallFlee" type="button">' + t('ui_call_pet') + '</button>' +
+              '<button class="wood-btn' + (isSelected ? ' muted' : '') + '" id="actSelect" type="button">' + (isSelected ? t('ui_selected') : t('ui_select_pet')) + '</button>' +
               '<button class="wood-btn muted" id="actTransfer" type="button">' + t('ui_transfer') + '</button>') +
         '   </div>' +
         '</div>'
@@ -446,7 +456,7 @@ function openPetDetail(element, index) {
         );
     }
 
-    wireDetailActions(element, isActive);
+    wireDetailActions(element, isActive, index);
 
     post('getPetData', { index: currentIndex }, function (data) {
         if (!data) data = {};
@@ -473,10 +483,22 @@ function setStat(barId, valId, value) {
     if (label) label.textContent = Math.round(value) + '%';
 }
 
-function wireDetailActions(element, isActive) {
+function wireDetailActions(element, isActive, index) {
     bindBtn('actCallFlee', function () {
         post('spawnPet', { pet: element, index: currentIndex });
         closeUI();
+    });
+
+    bindBtn('actSelect', function () {
+        var isDog = element.type === 'dog';
+        var isSelected = (isDog && state.selectedDog && state.selectedDog == element.id) ||
+            (!isDog && state.selectedBird && state.selectedBird == element.id);
+        if (isSelected) return;
+        post(isDog ? 'selectDog' : 'selectBird', { id: element.id }, function () {
+            if (isDog) { state.selectedDog = element.id; } else { state.selectedBird = element.id; }
+            renderOwnedPetList();
+            openPetDetail(element, index);
+        });
     });
 
     if (isActive) {

@@ -44,7 +44,7 @@ local UiLocaleKeys = {
     'ui_dogs_title', 'ui_dogs_desc', 'ui_birds_desc', 'ui_no_pets_available', 'ui_shelf_empty',
     'ui_no_pets_owned', 'ui_no_animations_available', 'ui_no_animations_for_pet', 'ui_no_commands_for_pet',
     'ui_type_dog', 'ui_type_bird', 'ui_type_xp', 'ui_hunting_dog', 'ui_hunting_bird', 'ui_dead',
-    'ui_active', 'ui_selected', 'ui_condition_title', 'ui_health', 'ui_hunger', 'ui_thirst',
+    'ui_active', 'ui_select_pet', 'ui_selected', 'ui_condition_title', 'ui_health', 'ui_hunger', 'ui_thirst',
     'ui_actions_title', 'ui_call_flee', 'ui_call_pet', 'ui_feeding', 'ui_drinking', 'ui_carrying',
     'ui_commands', 'ui_follow_unfollow', 'ui_transfer', 'ui_follow_position_title', 'ui_forward',
     'ui_left', 'ui_right', 'ui_carry_anim', 'ui_take_shoulder', 'ui_please_select_pet',
