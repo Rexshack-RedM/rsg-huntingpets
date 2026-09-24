@@ -1016,15 +1016,6 @@ AddEventHandler('rsg-huntingpets:checktalk', function()
     end
 end)
 --------------------------------------------------------
-RegisterNetEvent('rsg-huntingpets:deleteped_c')
-AddEventHandler('rsg-huntingpets:deleteped_c', function(ped)
-    local _ped = NetToPed(tonumber(ped))
-    if DoesEntityExist(_ped) then 
-        DeleteEntity(_ped)
-        SetEntityAsNoLongerNeeded(_ped)
-    end
-end)
---------------------------------------------------------
 AddEventHandler('onResourceStop', function(resourceName)
 	if (GetCurrentResourceName() ~= resourceName) then
 	  return

@@ -224,16 +224,20 @@ RegisterNUICallback('sellBird', function(data, cb)
     TriggerServerEvent('rsg-huntingpets:server:sellBird', data.id)
 end)
 
--- Select dog (from My Pets tab)
+-- Select dog (from My Pets tab). Waits for the server to confirm ownership
+-- and save the selection before telling the NUI whether it succeeded, so
+-- the "Selected" state it shows always matches what's actually saved.
 RegisterNUICallback('selectDog', function(data, cb)
-    cb('ok')
-    TriggerServerEvent('rsg-huntingpets:server:selectDog', data.id)
+    RSGCore.Functions.TriggerCallback('rsg-huntingpets:server:selectDog', function(success)
+        cb({ success = success == true })
+    end, data.id)
 end)
 
 -- Select bird (from My Pets tab)
 RegisterNUICallback('selectBird', function(data, cb)
-    cb('ok')
-    TriggerServerEvent('rsg-huntingpets:server:selectBird', data.id)
+    RSGCore.Functions.TriggerCallback('rsg-huntingpets:server:selectBird', function(success)
+        cb({ success = success == true })
+    end, data.id)
 end)
 
 -- Buy pet (from NUI shop). The price shown in the NUI is cosmetic only —
