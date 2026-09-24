@@ -136,8 +136,10 @@ function openUI(data) {
     state.ownedBirds = data.ownedBirds || [];
     state.activePet = data.activePet || 'None';
     state.modelNames = data.modelNames || {};
-    state.selectedDog = data.selectedDog || null;
-    state.selectedBird = data.selectedBird || null;
+    /* Use `!== undefined` rather than `||` so a pet ID of 0 is kept as a
+       real selection instead of being coerced to "nothing selected". */
+    state.selectedDog = data.selectedDog !== undefined ? data.selectedDog : null;
+    state.selectedBird = data.selectedBird !== undefined ? data.selectedBird : null;
     state.scavengerItems = data.scavengerItems || [];
     state.fishItems = data.fishItems || [];
     if (data.ui) state.ui = Object.assign({}, DEFAULT_UI, data.ui);
@@ -318,6 +320,16 @@ function selectShopPet(pet, type) {
     qs('#petName').focus();
 }
 
+/* Whether `element` (a tagged entry from myPets, with a .type of 'dog' or
+   'bird') is the player's currently selected default pet of its type.
+   Compares with `!= null` rather than truthiness so a pet ID of 0 still
+   counts as selected, and is the single source of truth for this check
+   instead of being reimplemented at each call site. */
+function isPetSelected(element) {
+    var selectedId = element.type === 'dog' ? state.selectedDog : state.selectedBird;
+    return selectedId != null && selectedId == element.id;
+}
+
 /* ─────────────── MY PETS ─────────────── */
 function openMyPets() {
     currentIndex = '';
@@ -354,8 +366,7 @@ function renderOwnedPetList() {
         var isDog = element.type === 'dog';
         var petType = isDog ? t('ui_type_dog') : t('ui_type_bird');
         var isActive = currentPet[element.name] === true;
-        var isSelected = (isDog && state.selectedDog && state.selectedDog == element.id) ||
-            (!isDog && state.selectedBird && state.selectedBird == element.id);
+        var isSelected = isPetSelected(element);
 
         var pill = '';
         if (element.isDead === true) {
@@ -387,8 +398,7 @@ function openPetDetail(element, index) {
 
     var isActive = currentPet[element.name] === true;
     var isDog = element.type === 'dog';
-    var isSelected = (isDog && state.selectedDog && state.selectedDog == element.id) ||
-        (!isDog && state.selectedBird && state.selectedBird == element.id);
+    var isSelected = isPetSelected(element);
     var detail = qs('#petDetail');
     var img = 'images/' + element.img;
 
@@ -400,7 +410,7 @@ function openPetDetail(element, index) {
         '       <div class="hero-desc">' + (element.type === 'dog' ? t('ui_hunting_dog') : t('ui_hunting_bird')) + ' \u2022 XP ' + (element.xp || 0) + '</div>' +
         '   </div>' +
         (isActive ? '<span class="pill">' + t('ui_active') + '</span>' : '') +
-        (isSelected ? '<span class="pill muted">' + t('ui_selected') + '</span>' : '') +
+        (isSelected ? '<span class="pill muted" id="heroSelectedPill">' + t('ui_selected') + '</span>' : '') +
         '</div>';
 
     if (isActive) {
@@ -491,13 +501,19 @@ function wireDetailActions(element, isActive, index) {
 
     bindBtn('actSelect', function () {
         var isDog = element.type === 'dog';
-        var isSelected = (isDog && state.selectedDog && state.selectedDog == element.id) ||
-            (!isDog && state.selectedBird && state.selectedBird == element.id);
-        if (isSelected) return;
-        post(isDog ? 'selectDog' : 'selectBird', { id: element.id }, function () {
+        if (isPetSelected(element)) return;
+        /* The NUI callback now only resolves once the server has verified
+           ownership and actually saved the selection (see selectDog/selectBird
+           in server_dogs.lua), so `result.success` reflects the real outcome
+           instead of the UI assuming success as soon as the round-trip lands. */
+        post(isDog ? 'selectDog' : 'selectBird', { id: element.id }, function (result) {
+            if (!result || !result.success) {
+                toast(t('ui_toast_error'), 'error');
+                return;
+            }
             if (isDog) { state.selectedDog = element.id; } else { state.selectedBird = element.id; }
             renderOwnedPetList();
-            openPetDetail(element, index);
+            markPetSelectedInDetail();
         });
     });
 
@@ -579,6 +595,21 @@ function wireDetailActions(element, isActive, index) {
             post('transferPet', { pet: element, index: currentIndex });
             closeUI();
         });
+    }
+}
+
+/* Reflects a just-confirmed selection in the already-open detail panel
+   without rebuilding it (which would also re-run getPetData needlessly) --
+   just adds the "Selected" pill if it isn't there yet and mutes the button. */
+function markPetSelectedInDetail() {
+    var hero = qs('.detail-hero');
+    if (hero && !qs('#heroSelectedPill')) {
+        hero.insertAdjacentHTML('beforeend', '<span class="pill muted" id="heroSelectedPill">' + t('ui_selected') + '</span>');
+    }
+    var btn = qs('#actSelect');
+    if (btn) {
+        btn.textContent = t('ui_selected');
+        btn.classList.add('muted');
     }
 }
 

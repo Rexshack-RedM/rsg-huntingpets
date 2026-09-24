@@ -159,38 +159,40 @@ end)
 
 -- ═══════════════════════════════════════════════════════════
 -- SELECT DOG (save selection to DB)
+-- A callback (not a fire-and-forget event) so the NUI only updates its
+-- "Selected" state once the server has actually confirmed and saved it.
 -- ═══════════════════════════════════════════════════════════
-RegisterServerEvent('rsg-huntingpets:server:selectDog')
-AddEventHandler('rsg-huntingpets:server:selectDog', function(dogId)
+RSGCore.Functions.CreateCallback('rsg-huntingpets:server:selectDog', function(source, cb, dogId)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
-    if not Player then return end
+    if not Player then cb(false) return end
     local cid = Player.PlayerData.citizenid
     local charid = Player.PlayerData.id
 
     local owned = MySQL.query.await('SELECT id FROM player_dogs WHERE id = ? AND identifier = ? AND charid = ?', {dogId, cid, charid})
-    if not owned or not owned[1] then return end
+    if not owned or not owned[1] then cb(false) return end
 
     MySQL.execute('INSERT INTO player_selected_pets (identifier, charid, selected_dog) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE selected_dog = ?', {cid, charid, dogId, dogId})
     TriggerClientEvent('ox_lib:notify', src, {title = locale('notif_title_pets'), description = locale('notif_dog_selected'), duration = 5000, type = 'success'})
+    cb(true)
 end)
 
 -- ═══════════════════════════════════════════════════════════
 -- SELECT BIRD (save selection to DB)
 -- ═══════════════════════════════════════════════════════════
-RegisterServerEvent('rsg-huntingpets:server:selectBird')
-AddEventHandler('rsg-huntingpets:server:selectBird', function(birdId)
+RSGCore.Functions.CreateCallback('rsg-huntingpets:server:selectBird', function(source, cb, birdId)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
-    if not Player then return end
+    if not Player then cb(false) return end
     local cid = Player.PlayerData.citizenid
     local charid = Player.PlayerData.id
 
     local owned = MySQL.query.await('SELECT id FROM player_birds WHERE id = ? AND identifier = ? AND charid = ?', {birdId, cid, charid})
-    if not owned or not owned[1] then return end
+    if not owned or not owned[1] then cb(false) return end
 
     MySQL.execute('INSERT INTO player_selected_pets (identifier, charid, selected_bird) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE selected_bird = ?', {cid, charid, birdId, birdId})
     TriggerClientEvent('ox_lib:notify', src, {title = locale('notif_title_pets'), description = locale('notif_bird_selected'), duration = 5000, type = 'success'})
+    cb(true)
 end)
 
 -- ═══════════════════════════════════════════════════════════
