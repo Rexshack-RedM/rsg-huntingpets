@@ -24,6 +24,7 @@ server_scripts {
     'server/database.lua',
     'server/server_dogs.lua',
     'server/server_birds.lua',
+    'server/versionchecker.lua'
 }
 
 ui_page 'html/index.html'
