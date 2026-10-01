@@ -1,3 +1,7 @@
+-----------------------------------------------------------------------
+-- Improved Version Checker for Rexshack-RedM Resources
+----------------------------------------------------------------------- 
+
 local resourceName = GetCurrentResourceName()
 local githubRawBase = 'https://raw.githubusercontent.com/Rexshack-RedM/rsg-versioncheckers/main/'
 
