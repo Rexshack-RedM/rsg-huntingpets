@@ -66,4 +66,9 @@ local function CheckVersion()
             printLog('warning', ('You are running a newer version (%s) than the remote (%s). Possible dev build?'):format(currentVersion, remoteVersion))
         end
     end, 'GET')
-+end
+end
+
+--------------------------------------------------------------------------------------------------
+-- Start version check on resource start
+--------------------------------------------------------------------------------------------------
+CheckVersion()
