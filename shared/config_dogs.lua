@@ -83,7 +83,7 @@ Config.Dogs = {
         }
     },
     {
-        Text = "$100 - Rufus",
+        Text = "$100 - Chesapeake Bay Retriever",
         SubText = "",
         Desc = locale('dogdesc_rufus'),
         Name = locale('dogname_rufus'),
@@ -95,7 +95,7 @@ Config.Dogs = {
         }
     },
     {
-        Text = "$150 - Coon Hound",
+        Text = "$150 - Blue Tick Coon Hound",
         SubText = "",
         Desc = locale('dogdesc_coonhound'),
         Name = locale('dogname_coonhound'),
@@ -143,7 +143,7 @@ Config.Dogs = {
         }
     },
     {
-        Text = "$100 - Foxhound",
+        Text = "$100 - American Fox Hound",
         SubText = "",
         Desc = locale('dogdesc_foxhound'),
         Name = locale('dogname_foxhound'),

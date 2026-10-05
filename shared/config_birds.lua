@@ -203,7 +203,7 @@ Config.ScavengerItems = {
         xpreq = 15,
     },
     [22] = {
-        name = "a_c_parakeet_01",
+        name = "a_c_carolinaparakeet_01",
         amount = 1,
         xp = 2,
         xpreq = 5,
